@@ -152,7 +152,7 @@ class Simulacion():
 
 
     return tiempos_espera_normal, tiempos_espera_premiere
-  if __name__ == "__main__": #se implementa el amin del programa
+  if __name__ == "__main__": #se implementa el main del programa
     simulacion1=Simulacion(100,19,1/6,81,1,3,1)
     tiempos_espera_normal,tiempos_espera_premiere=simulacion1.simular()
     print(tiempos_espera_normal)
