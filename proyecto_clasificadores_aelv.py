@@ -14,7 +14,7 @@ import pandas as pd #importamos las paqueterias que usaremos
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score, confusion_matrix, log_loss
-from sklearn.preprocessing import LabelEncoder #Para cambiar a etiquetas numericas
+from sklearn.preprocessing import LabelEncoder #Para cambiar a etiquetas numéricas 
 from sklearn.svm import SVC #support_vector_machine
 from sklearn.ensemble import RandomForestClassifier #random_forest
 from sklearn.linear_model import LogisticRegression #regresion_logistica
@@ -25,20 +25,20 @@ class Clasificadores():
   '''
 
   La clase Clasificadores representa a un conjunto de modelos de aprendizaje
-  automatico, en los que se encuentran: Support Vector Machine, Random Forest,
+  automático, en los que se encuentran: Support Vector Machine, Random Forest,
   Logistic Regression, Decision Tree, K-nearest Neighbors y Gradient Boosting, la
-  clase recibe como parametros para su inicializacion el nombre del clasificador
-  a instanciar, asi como la ruta de archivo de la base de datos que usara para su
+  clase recibe como parámetros para su inicialización el nombre del clasificador
+  a instanciar, así como la ruta de archivo de la base de datos que usará para su
   entrenamiento y prueba, dicha base de datos debe estar contenida en un archivo
-  .csv y tener sus estadisticas (salvo las etiquetas) en columnas numericas.
+  .csv y tener sus estadísticas (salvo las etiquetas) en columnas numéricas.
 
   '''
   def __init__(self,clasificador,ruta_de_archivo):
     '''
 
     Con el nombre del clasificador y la ruta de archivo se verifica que el nombre
-    y la terminacion de la ruta sean correctos y que la base de datos contenga
-    columnas de datos numericos, de lo contrario se muestran los mensajes de error
+    y la terminación de la ruta sean correctos y que la base de datos contenga
+    columnas de datos numéricos, de lo contrario se muestran los mensajes de error
     correspondientes al usuario, cuando el input es el correcto se crea el data
     frame proveniente de la ruta de archivo y se crea tambien la lista de etiquetas
     "Y" y la matriz de atributos "X".
@@ -53,55 +53,57 @@ class Clasificadores():
       clf_soportados=", ".join(self.clasificadores_validos.keys())
       raise ValueError(f"El clasificador ingresado: '{clasificador}' no es válido.\n"
       f"Los clasificadores validos son: {clf_soportados}")
-    if ruta_de_archivo.endswith(".csv"): #Se verifica la terminacion .csv
+    if ruta_de_archivo.endswith(".csv"): #Se verifica la terminación .csv
       self.data_frame=pd.read_csv(ruta_de_archivo) #se crea el data frame
-      try: #Se busca si hay datos no numericos a partir de la tercer columna:
+      try: #Se busca si hay datos no numéricos a partir de la tercer columna:
         for columna in self.data_frame.columns[2:]:
           pd.to_numeric(self.data_frame[columna],errors="raise")
       except ValueError:
         print(f"Error: La matriz de atributos en '{ruta_de_archivo}' contiene \n"
-        "datos estadisticos no numericos")
+        "datos estadísticos no numéricos")
       else: #En caso de no levantar error:
         self.y=list(self.data_frame.iloc[:,1]) #se crea la lista de etiquetas
         self.x=np.array(self.data_frame.iloc[:,2:]) #se crea la matriz de atributos
-    else: #En caso de que la ruta tenga la terminacion incorrecta
+    else: #En caso de que la ruta tenga la terminyacion incorrecta
       raise ValueError(f"El archivo con ruta '{ruta_de_archivo}' no es un archivo\n"
                                                                          ".csv")
   def predecir(self,porcion):
     '''
 
-    Este metodo recibe como parametro la porcion de datos de prueba que seran
+    Este método recibe como parametro la porcion de datos de prueba que seran
     tomados de "X","Y", el resto de datos seran de entrenamiento, la porcion debe
     ser un numero entre 0 y 0.5, de lo contrario se muestra un mensaje de error
     al usuario, en caso de no levantar error se crean las bases de datos de
     entrenamiento y prueba, se crea una instancia del clasificador elegido y se
     entrena, posterior a ello se predice una lista de etiquetas "Y" y con estas
-    se implementan cinco metricas estadisticas para evaluar la calidad del clasi-
+    se implementan cinco métricas estadísticas para evaluar la calidad del clasi-
     ficador, el metodo devuelve las etiquetas predichas y las metricas estadisti-
     cas calculadas, las metricas son:Matriz de confusion, promedio y desviacion
     estandar con validacion cruzada, precision y perdida logaritmica.
 
     '''
     if porcion<0 or porcion>0.5:
-      raise ValueError(f"Ingresaste una porcion de '{porcion}', el porcentaje de\n"
+      raise ValueError(f"Ingresaste una porción de '{porcion}', el porcentaje de\n"
       "los datos de prueba debe estar entre 0 y 0.5")
     else: #En caso de no levantar error:
       X_train, X_test, y_train, y_test = train_test_split(
       self.x, self.y, test_size=porcion, random_state=42) #se crea la base de
       #datos de prueba y entrenamiento.
       if self.clasificador=="svm" or self.clasificador=="regresion_logistica":
+          #Se aumenta el máximo de iteraciones, ya que con menos la solución no
+          #converge, especialmente para la regresión logística.
         instancia_clf=self.clasificadores_validos[self.clasificador](max_iter=5000)
       else:
         instancia_clf=self.clasificadores_validos[self.clasificador]() #instancia
       instancia_clf.fit(X_train,y_train) #se entrena al clasificador
       y_pred=instancia_clf.predict(X_test) #etiquetas predichas
-      #Tendremos 5 metricas estadisticas denotadas por m1,m2,m3,m4 y m5
+      #Tendremos 5 métricas estadísticas denotadas por m1,m2,m3,m4 y m5
       m1=confusion_matrix(y_test,y_pred)
       val_cruz=cross_val_score(instancia_clf,X_train,y_train,cv=6)
       m2=val_cruz.mean()
       m3=val_cruz.std()
       m4=accuracy_score(y_test,y_pred)
-      le=LabelEncoder()
+      le=LabelEncoder() #Para crear etiquetas numéricas 
       y_test_numerica=le.fit_transform(y_test)
       y_pred_numerica=le.fit_transform(y_pred)
       m5=log_loss(y_test_numerica,y_pred_numerica)
