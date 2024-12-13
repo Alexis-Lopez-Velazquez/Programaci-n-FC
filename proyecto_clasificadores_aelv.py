@@ -79,7 +79,7 @@ class Clasificadores():
     se implementan cinco métricas estadísticas para evaluar la calidad del clasi-
     ficador, el metodo devuelve las etiquetas predichas y las metricas estadisti-
     cas calculadas, las metricas son:Matriz de confusion, promedio y desviacion
-    estandar con validacion cruzada, precision y perdida logaritmica.
+    estandar con validacion cruzada, exactitud y perdida logaritmica.
 
     '''
     if porcion<0 or porcion>0.5:
@@ -100,13 +100,13 @@ class Clasificadores():
       #Tendremos 5 métricas estadísticas denotadas por m1,m2,m3,m4 y m5
       m1=confusion_matrix(y_test,y_pred)
       val_cruz=cross_val_score(instancia_clf,X_train,y_train,cv=6)
-      m2=val_cruz.mean()
-      m3=val_cruz.std()
-      m4=accuracy_score(y_test,y_pred)
+      m2=val_cruz.mean() #promedio
+      m3=val_cruz.std() #desviacion estandar
+      m4=accuracy_score(y_test,y_pred) #exactitud
       le=LabelEncoder() #Para crear etiquetas numéricas 
       y_test_numerica=le.fit_transform(y_test)
       y_pred_numerica=le.fit_transform(y_pred)
-      m5=log_loss(y_test_numerica,y_pred_numerica)
+      m5=log_loss(y_test_numerica,y_pred_numerica) #perdida logaritmica
       return y_pred, m1, m2, m3, m4, m5
 if __name__=="__main__":
   #Se entrenan cada uno de los clasificadores:
